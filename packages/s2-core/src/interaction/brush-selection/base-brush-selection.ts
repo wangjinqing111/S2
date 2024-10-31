@@ -48,8 +48,7 @@ import { BaseEvent } from '../base-interaction';
 
 export class BaseBrushSelection
   extends BaseEvent
-  implements BaseEventImplement
-{
+  implements BaseEventImplement {
   public displayedCells: S2CellType[] = [];
 
   public prepareSelectMaskShape: DisplayObject;
@@ -112,7 +111,14 @@ export class BaseBrushSelection
   // 默认是 Data cell 的绘制区
   protected isPointInCanvas(point: PointLike): boolean {
     const { height, width } = this.spreadsheet.facet.getCanvasSize();
-    const { minX, minY } = this.spreadsheet.facet.panelBBox;
+    let { minX, minY } = this.spreadsheet.facet.panelBBox;
+
+    // 行头不冻结
+    if (!this.spreadsheet.options.frozen?.rowHeader) {
+      const offset = this.spreadsheet.facet.getScrollOffset();
+      const { scrollX } = offset;
+      minX = Math.max(minX - scrollX, 0);
+    }
 
     return (
       point?.x > minX &&
@@ -152,7 +158,7 @@ export class BaseBrushSelection
   ) => {
     const { x, y } = delta;
     const { facet } = this.spreadsheet;
-    const { minX, maxX } = isRowHeader ? facet.cornerBBox : facet.panelBBox;
+    let { minX, maxX } = isRowHeader ? facet.cornerBBox : facet.panelBBox;
     const { minY, maxY } = facet.panelBBox;
 
     let newX = this.endBrushPoint?.x + x;
@@ -162,6 +168,13 @@ export class BaseBrushSelection
     const vScrollBarWidth = facet.vScrollBar?.getBBox()?.width;
     // 额外加缩进，保证 getShape 在 panelBox 内
     const extraPixel = 2;
+
+    // 行头不冻结
+    if (!isRowHeader && !this.spreadsheet.options.frozen?.rowHeader) {
+      const offset = this.spreadsheet.facet.getScrollOffset();
+      const { scrollX } = offset;
+      minX = Math.max(minX - scrollX, 0);
+    }
 
     if (newX > maxX) {
       newX = maxX - vScrollBarWidth - extraPixel;
@@ -809,11 +822,11 @@ export class BaseBrushSelection
     return false;
   }
 
-  protected bindMouseDown() {}
+  protected bindMouseDown() { }
 
-  protected bindMouseMove() {}
+  protected bindMouseMove() { }
 
-  protected updateSelectedCells() {}
+  protected updateSelectedCells() { }
 
   protected getPrepareSelectMaskPosition(brushRange: BrushRange): PointLike {
     return {

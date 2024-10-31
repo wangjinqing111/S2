@@ -146,7 +146,8 @@ export class DataCellBrushSelection extends BaseBrushSelection {
 
   protected getPrepareSelectMaskPosition(brushRange: BrushRange): PointLike {
     const { minX, minY } = this.spreadsheet.facet.panelBBox;
-    const x = Math.max(brushRange.start.x, minX);
+    // 行头不冻结
+    const x = !this.spreadsheet.options.frozen?.rowHeader ? brushRange.start.x : Math.max(brushRange.start.x, minX);
     const y = Math.max(brushRange.start.y, minY);
 
     return {

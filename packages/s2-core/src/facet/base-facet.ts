@@ -931,15 +931,23 @@ export abstract class BaseFacet {
     );
   };
 
+  private getColRowWidth = () => {
+    if (!this.spreadsheet.options.frozen?.rowHeader) {
+      return this.layoutResult.colsHierarchy.width + this.layoutResult.rowsHierarchy.width;
+    }
+    return this.layoutResult.colsHierarchy.width;
+  }
+
   private getAdjustedScrollOffset = ({
     scrollX,
     scrollY,
     rowHeaderScrollX,
   }: ScrollOffset): ScrollOffset => {
+    const width = this.getColRowWidth();
     return {
       scrollX: getAdjustedScrollOffset(
         scrollX!,
-        this.layoutResult.colsHierarchy.width,
+        width,
         this.panelBBox.width,
       ),
       scrollY: getAdjustedScrollOffset(
